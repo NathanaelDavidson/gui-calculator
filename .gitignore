@@ -1,3 +1,7 @@
+# Do not track the following directories
+icons/
+themes/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
