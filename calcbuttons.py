@@ -1,7 +1,6 @@
 from tkinter import ttk
 from tkinter.ttk import Button, Frame, Style
 from enum import Enum
-import buttonkeys
 
 class Layouts(Enum):
     TRIG = [

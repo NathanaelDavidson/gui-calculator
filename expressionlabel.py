@@ -1,3 +1,7 @@
+# WIP. The goal is to define both interactive and static 
+# tkinter widgets which provide a better visual representation of operations
+# than the raw text representation currently in use.
+
 import expressionparser as ep
 from tkinter import Label
 
@@ -7,8 +11,9 @@ class ExpressionLabel(Label):
         self.size = size
 
     def factory(operator):
-        
-    
+        #TODO
+
+
     factory = staticmethod(factory)
 
 class FractionLabel(ExpressionLabel):
@@ -22,5 +27,5 @@ class FractionLabel(ExpressionLabel):
 
     
     def _create_operand_labels(self, operation):
-        num_label = ExpressionLabel.
+        #TODO
 

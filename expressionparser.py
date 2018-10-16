@@ -1,4 +1,5 @@
 import math
+import trigconfig as tc
 
 class Parser:
     INFIX_OPERATORS = {
@@ -11,12 +12,15 @@ class Parser:
     POSTFIX_OPERATORS = {
         '!': {'prec': 3, 'func': math.factorial}
     }
-    FUNCTIONS = {
-        'sin': math.sin, 
-        'cos': math.cos, 
-        'tan': math.tan
-    }
     FUNCTION_PRECEDENCE = 1000
+
+    def __init__(self, use_degrees=False):
+        self.trig_config = tc.TrigConfigurator(use_degrees)
+        self.functions = {
+            'sin': self.trig_config.sin,
+            'cos': self.trig_config.cos,
+            'tan': self.trig_config.tan
+        }
 
     def parse(self, expression):
         '''
@@ -41,6 +45,9 @@ class Parser:
         
         return self.current_item
 
+    def set_use_degrees(self, use_degrees):
+        self.trig_config.set_mode(use_degrees)
+
     def _empty_buffers(self):
         self._empty_letter_buffer()
         self._empty_number_buffer()      
@@ -48,7 +55,7 @@ class Parser:
     def _empty_letter_buffer(self):
         try:
             string_rep = ''.join(self.letter_buffer)
-            if string_rep in Parser.FUNCTIONS:
+            if string_rep in self.functions:
                 self._insert_new_function(string_rep)
             elif string_rep in Constant.VALUES:
                 operand = Constant(string_rep)
@@ -84,7 +91,6 @@ class Parser:
         new_operation = InfixOperation(operator, self.current_item)
         self.parent_stack.append(new_operation)
         self.current_item = None
-        
             
     def _insert_new_postfix_operation(self, symbol):
         operator = self._make_postfix_operator(symbol)
@@ -119,7 +125,7 @@ class Parser:
         return Operator(symbol, function, precedence)
 
     def _make_function(self, symbol):
-        function = Parser.FUNCTIONS[symbol]
+        function = self.functions[symbol]
         return Operator(symbol, function, Parser.FUNCTION_PRECEDENCE)
 
     def _move_to_parent(self):
@@ -173,10 +179,8 @@ class Parser:
                 self._move_to_parent()
             except ParentNotFoundError:
                 raise MathSyntaxError
-        
 
-
-
+       
 class Operand(object):
     def __init__(self, value):
         self.value = value

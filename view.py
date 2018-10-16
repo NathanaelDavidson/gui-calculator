@@ -1,5 +1,6 @@
 from calcbuttons import ButtonPanel, Layouts
 from tkinter import ttk
+import selectorpanel as sp
 from display import InputLine, HistoryDisplay
 
 
@@ -9,7 +10,7 @@ class View(ttk.Frame):
         ttk.Frame.__init__(self)
         self.input_string = ttk.tkinter.StringVar()
         self.output_string = ttk.tkinter.StringVar()
-
+        self.angle_unit_selector = sp.SelectorPanel(self, sp.Layout.DEG_RAD.value) #TODO move layouts from enum to dict
         self.button_frame = ttk.Frame(self)
         self.number_panel = ButtonPanel(self.button_frame, Layouts.NUM)
         self.operator_panel = ButtonPanel(self.button_frame, Layouts.OPER)
@@ -32,8 +33,14 @@ class View(ttk.Frame):
     def clear_input(self):
         self.input_line.clear_input()
 
+    def get_angle_mode(self):
+        return self.angle_unit_selector.get_mode()
+
     def get_input(self):
         return self.input_line.get_input()
+
+    def set_angle_mode_observer(self, callback):
+        return self.angle_unit_selector.set_mode_observer(callback)
     
     def set_current_result(self, string):
         self.input_line.set_result(string)
@@ -59,4 +66,5 @@ class View(ttk.Frame):
         self.grid()
         self.history_display.pack(expand=True, side='top', fill='x')
         self.input_line.pack(expand=True, side='top', fill='x')
+        self.angle_unit_selector.pack(expand=True, side='top', fill='x')
         self.show_button_frame()

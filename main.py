@@ -14,7 +14,9 @@ class Controller:
         }
 
         self._set_bindings()
+        self.view.set_angle_mode_observer(self.update_angle_mode)
         self.view.set_input_observer(self.update_operation)
+        self.update_angle_mode()
 
     def add_entry(self, entry):
         self.view.append_to_input(entry)
@@ -50,6 +52,10 @@ class Controller:
 
     def set_input_display(self, text):
         self.view.set_input_display(text)
+
+    def update_angle_mode(self, *args):
+        mode = self.view.get_angle_mode()
+        self.model.set_angle_mode(mode)
 
     def _handle_button_input(self, key):
         try:
@@ -90,9 +96,14 @@ class Controller:
 
 class Model:
     HIST_SIZE = 100
+    ANGLE_MODES = {
+        'deg': True,
+        'rad': False
+    }
     def __init__(self):
         self.history = []
         self.current_operation = None
+        self.parser = ep.Parser()
 
     def get_current_operation(self):
         return self.current_operation
@@ -107,9 +118,12 @@ class Model:
         self.history.insert(0, self.current_operation)
         self.current_operation = None
 
+    def set_angle_mode(self, mode):
+        use_degrees = Model.ANGLE_MODES[mode]
+        self.parser.set_use_degrees(use_degrees)
+
     def set_operation_from_expression(self, expression):
-        parser = ep.Parser()
-        self.current_operation = parser.parse(expression)
+        self.current_operation = self.parser.parse(expression)
 
     def get_result(self):
         return self.current_operation.get_value()
