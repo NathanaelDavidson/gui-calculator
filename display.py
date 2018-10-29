@@ -1,5 +1,6 @@
 import tkinter as tk
 
+
 class InputLine(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master, background='white')
@@ -59,10 +60,10 @@ class OperationView(tk.Frame):
         tk.Frame.__init__(self, master)
         self.input_string = ''
         self.result_string = ''
-        self.input_view = tk.Button(self, text=self.input_string, 
-            relief='flat', borderwidth=0, command=self.call_input)
-        self.result_view = tk.Button(self, text=self.result_string, 
-            relief='flat', borderwidth=0, command=self.call_result)
+        self.input_view = tk.Button(self, text=self.input_string,
+                                    relief='flat', borderwidth=0, command=self.call_input)
+        self.result_view = tk.Button(self, text=self.result_string,
+                                     relief='flat', borderwidth=0, command=self.call_result)
         self.callback = callback
         self.show()
 

@@ -1,7 +1,8 @@
 import tkinter as tk
 import expressionparser as ep
-import string
 import view
+# TODO Allow for interpretation of numbers expressed in scientific notation
+
 
 class Controller:
     def __init__(self):
@@ -100,6 +101,7 @@ class Model:
         'deg': True,
         'rad': False
     }
+
     def __init__(self):
         self.history = []
         self.current_operation = None
@@ -123,7 +125,7 @@ class Model:
         self.parser.set_use_degrees(use_degrees)
 
     def set_operation_from_expression(self, expression):
-        self.current_operation = self.parser.parse(expression)
+        self.current_operation = self.parser.parse_exp(expression)
 
     def get_result(self):
         return self.current_operation.get_value()

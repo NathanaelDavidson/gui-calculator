@@ -4,13 +4,12 @@ import selectorpanel as sp
 from display import InputLine, HistoryDisplay
 
 
-
 class View(ttk.Frame):
     def __init__(self):
         ttk.Frame.__init__(self)
         self.input_string = ttk.tkinter.StringVar()
         self.output_string = ttk.tkinter.StringVar()
-        self.angle_unit_selector = sp.SelectorPanel(self, sp.Layout.DEG_RAD.value) #TODO move layouts from enum to dict
+        self.angle_unit_selector = sp.SelectorPanel(self, sp.Layout.DEG_RAD.value)
         self.button_frame = ttk.Frame(self)
         self.number_panel = ButtonPanel(self.button_frame, Layouts.NUM)
         self.operator_panel = ButtonPanel(self.button_frame, Layouts.OPER)
@@ -25,10 +24,10 @@ class View(ttk.Frame):
     def backspace(self):
         self.input_line.backspace()
 
-    def bind_all_buttons(self, function):
-        self.number_panel.bind_all_buttons(function)
-        self.operator_panel.bind_all_buttons(function)
-        self.trig_panel.bind_all_buttons(function)
+    def bind_all_buttons(self, func):
+        self.number_panel.bind_all_buttons(func)
+        self.operator_panel.bind_all_buttons(func)
+        self.trig_panel.bind_all_buttons(func)
 
     def clear_input(self):
         self.input_line.clear_input()

@@ -1,6 +1,7 @@
 from tkinter import ttk
-from tkinter.ttk import Button, Frame, Style
+from tkinter.ttk import Button, Frame
 from enum import Enum
+
 
 class Layouts(Enum):
     TRIG = [
@@ -40,9 +41,9 @@ class ButtonPanel(Frame):
     def add_button(self, key):
         self.buttons[key] = CalcButton(self, key)
 
-    def bind_all_buttons(self, function):
+    def bind_all_buttons(self, func):
         for key in self.buttons:
-            self.buttons[key].set_callback(function)
+            self.buttons[key].set_callback(func)
 
     def create_buttons(self):
         num_rows = len(self.button_layout)
@@ -58,8 +59,8 @@ class ButtonPanel(Frame):
                 next_col_span += 1
             else:
                 self.add_button(key)
-                self.buttons[key].grid(row=row_index, \
-                    column=col_index-next_col_span+1, columnspan=next_col_span, sticky='ew')
+                self.buttons[key].grid(row=row_index,
+                                       column=col_index-next_col_span+1, columnspan=next_col_span, sticky='ew')
                 next_col_span = 1
 
     def get_button_keys(self):
@@ -80,12 +81,14 @@ class CalcButton(Button):
         self.callback = callback
         self.config(command=self.call)
 
+
 BUTTON_ICONS = {
     'BackSpace': '\u232b',
     '/': '\u00f7',
     '*': '\u00d7',
     'pi': '\u03c0'
 }
+
 
 def _get_button_icon(key):
     try:
