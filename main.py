@@ -1,3 +1,5 @@
+import os
+import sys
 import tkinter as tk
 import expressionparser as ep
 import view
@@ -133,7 +135,12 @@ class Model:
 if __name__ == '__main__':
     root = tk.Tk()
     root.title('Calculator')
-    root.iconbitmap('icons/Dtafalonso-Calculator.ico')
+    if getattr(sys, 'frozen', False):
+        icon_dir = sys._MEIPASS + '\\resources\\'
+    else:
+        icon_dir = os.path.dirname(os.path.abspath(__file__)) + '\\icons\\'
+    icon_name = 'Dtafalonso-Calculator.ico'
+    root.iconbitmap(icon_dir + icon_name)
     root.option_add('*Font', ('Segoe UI', 14))
     app = Controller()
     root.mainloop()

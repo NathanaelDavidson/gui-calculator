@@ -24,11 +24,25 @@ class Parser:
         }
         self.current_item = None
         self.parent_stack = []
-        self.input_buffer = _InputBuffer()
+        self.letter_buffer = _LetterBuffer()
+        self.number_buffer = _NumberBuffer()
 
     def append_to_operation(self, char):
-        if self._is_infix_operator(char):
-            self._empty_input_buffer()
+        if char.isdecimal() or char == '.':
+            if not self.letter_buffer.is_empty:
+                self._empty_letter_buffer()
+            self.number_buffer.insert(char)
+        elif char.isalpha():
+            if not self.number_buffer.is_empty:
+                if char.lower() == 'e':
+                    self.number_buffer.insert(char)
+                else:
+                    self._empty_number_buffer()
+                    self.letter_buffer.insert(char)
+            else:
+                self.letter_buffer.insert(char)
+        elif self._is_infix_operator(char):
+            self._empty_buffers()
             if not self.current_item:
                 if char == '-':
                     new_operator = Operator('-', lambda a: -1 * a, Parser.FUNCTION_PRECEDENCE)
@@ -38,20 +52,18 @@ class Parser:
             else:
                 self._insert_new_infix_operation(char)
         elif self._is_postfix_operator(char):
-            self._empty_input_buffer()
+            self._empty_buffers()
             self._insert_new_postfix_operation(char)
         elif char == '(':
-            self._empty_input_buffer()
+            self._empty_buffers()
             self.parent_stack.append(self.current_item)
             self.current_item = None
         elif char == ')':
-            self._empty_input_buffer()
+            self._empty_buffers()
             try:
                 self._move_to_parent()
             except ParentNotFoundError:
                 raise MathSyntaxError
-        else:
-            self.input_buffer.insert(char)
 
     def parse_exp(self, expression):
         """
@@ -65,11 +77,12 @@ class Parser:
 
         self.current_item = None
         self.parent_stack = []
-        self.input_buffer.reset()
+        self.letter_buffer.reset()
+        self.number_buffer.reset()
 
         for char in expression:
             self.append_to_operation(char)
-        self._empty_input_buffer()
+        self._empty_buffers()
 
         while len(self.parent_stack):
             self._move_to_parent()
@@ -79,16 +92,22 @@ class Parser:
     def set_use_degrees(self, use_degrees):
         self.trig_config.set_mode(use_degrees)
 
-    def _empty_input_buffer(self):
-        if not self.input_buffer.is_empty:
-            input_val = self.input_buffer.get_input_and_clear()
-            if isinstance(input_val, float) or isinstance(input_val, int):
-                self._insert_new_operand(Operand(input_val))
-            elif isinstance(input_val, str):
-                if input_val in self.functions.keys():
-                    self._insert_new_function(input_val)
-                elif input_val in Constant.VALUES.keys():
-                    self._insert_new_operand(Constant(input_val))
+    def _empty_number_buffer(self):
+        val = self.number_buffer.get_output_and_clear()
+        self._insert_new_operand(Operand(val))
+
+    def _empty_letter_buffer(self):
+        symbol = self.letter_buffer.get_output_and_clear()
+        if symbol in self.functions.keys():
+            self._insert_new_function(symbol)
+        elif symbol in Constant.VALUES.keys():
+            self._insert_new_operand(Constant(symbol))
+
+    def _empty_buffers(self):
+        if not self.letter_buffer.is_empty:
+            self._empty_letter_buffer()
+        if not self.number_buffer.is_empty:
+            self._empty_number_buffer()
 
     def _insert_new_function(self, symbol):
         if self.current_item:
@@ -348,32 +367,9 @@ class Operator:
 class _InputBuffer:
     def __init__(self):
         self.data = []
-        self.input_type = None
 
-    def get_input_and_clear(self):
-        result = self.input_type(''.join(self.data))
-        self.reset()
-        print('result:' + str(result))
-        return result
-
-    def insert(self, char):
-        if not self.input_type:
-            self._choose_input_type(char)
-        elif self.input_type == int:
-            if char == '.' or char.lower() == 'e' and 'e' not in [c.lower() for c in self.data]:
-                self.input_type = float
-            elif not char.isdecimal():
-                raise MathSyntaxError('Unexpected character ' + char)
-        elif self.input_type == float:
-            if not (char.isdecimal() or char.lower() == 'e' and 'e' not in [c.lower() for c in self.data]):
-                raise MathSyntaxError('Unexpected character ' + char)
-        elif self.input_type == str:
-            if not char.isalpha():
-                raise MathSyntaxError('Unexpected character ' + char)
-        self.data.append(char)
-        for item in self.data:
-            print(item, end=',')
-        print()
+    def __contains__(self, item):
+        return item in self.data
 
     @property
     def is_empty(self):
@@ -381,18 +377,40 @@ class _InputBuffer:
 
     def reset(self):
         self.data = []
-        self.input_type = None
 
-    def _choose_input_type(self, first_char):
-        # Sets self.input_type to the appropriate type based on the first character to be stored in the buffer
-        if first_char.isdecimal():
-            self.input_type = int
-        elif first_char.isalpha():
-            self.input_type = str
-        elif first_char == '.':
-            self.input_type = float
+
+class _LetterBuffer(_InputBuffer):
+    def __init__(self):
+        _InputBuffer.__init__(self)
+
+    def insert(self, char):
+        self.data.append(char)
+
+    def get_output_and_clear(self):
+        string = ''.join(self.data)
+        self.reset()
+        return string
+
+
+class _NumberBuffer(_InputBuffer):
+    def __init__(self):
+        _InputBuffer.__init__(self)
+        self.value_type = int
+
+    def insert(self, char):
+        if char == '.' or char.lower() == 'e':
+            self.value_type = float
+        self.data.append(char)
+
+    def get_output_and_clear(self):
+        try:
+            val_string = ''.join(self.data)
+            val = self.value_type(val_string)
+        except ValueError:
+            raise MathSyntaxError('Cannot make number from ' + val_string)
         else:
-            raise MathSyntaxError('Unexpected character ' + first_char)
+            self.reset()
+            return val
 
 
 class MathSyntaxError(Exception):
