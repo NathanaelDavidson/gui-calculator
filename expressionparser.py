@@ -34,11 +34,13 @@ class Parser:
             self.number_buffer.insert(char)
         elif char.isalpha():
             if not self.number_buffer.is_empty:
+                self._empty_number_buffer()
                 if char.lower() == 'e':
-                    self.number_buffer.insert(char)
+                    self._insert_new_infix_operation('*')
+                    self._insert_new_operand(Operand(10))
+                    self._insert_new_infix_operation('^')
                 else:
-                    self._empty_number_buffer()
-                    self.letter_buffer.insert(char)
+                    raise MathSyntaxError
             else:
                 self.letter_buffer.insert(char)
         elif self._is_infix_operator(char):
@@ -47,7 +49,7 @@ class Parser:
                 if char == '-':
                     new_operator = Operator('-', lambda a: -1 * a, Parser.FUNCTION_PRECEDENCE)
                     self.parent_stack.append(Function(new_operator))
-                else:
+                elif char != '+':
                     raise MathSyntaxError
             else:
                 self._insert_new_infix_operation(char)
