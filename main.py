@@ -1,7 +1,6 @@
 import tkinter as tk
 import expressionparser as ep
 import view
-# TODO Allow for interpretation of numbers expressed in scientific notation
 
 
 class Controller:

@@ -71,7 +71,7 @@ class OperationView(tk.Frame):
         return self.callback(self.input_string)
     
     def call_result(self):
-        return self.callback(self.result_string)
+        return self.callback(self.result_string.replace('+', ''))
 
     def set_callback(self, callback):
         self.callback = callback
