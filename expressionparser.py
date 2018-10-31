@@ -178,7 +178,7 @@ class Parser:
         except IndexError:
             return False
         else:
-            return parent and parent.get_precedence() > operator.get_precedence()
+            return parent and parent.get_precedence() >= operator.get_precedence()
 
     def _print_parent_stack(self):
         string = '[%s]' % ', '.join([str(item) for item in self.parent_stack])
